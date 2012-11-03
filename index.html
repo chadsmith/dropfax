@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>DropFax</title>
+    <style>
+      h1, p, div, input {
+        text-align: center;
+      }
+      input {
+        border: 1px solid #ccc;
+        font-size: 1.5em;
+      }
+      div {
+        display: block;
+        width: 400px;
+        padding: 10em 0;
+        border: 4px dashed #666;
+        margin: 1em auto;
+      }
+      div.hover {
+        border-color: #f00;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>DropFax</h1>
+    <p>
+      <input placeholder="Fax Number">
+    </p>
+    <div>Drop a doc or pdf here</div>
+    <p class="status"></p>
+    <script>
+      if(!window.FormData || !'draggable' in document.createElement('a'))
+        return false;
+      var
+        dropfax = document.getElementsByTagName('div')[0],
+        input = document.getElementsByTagName('input')[0],
+        status = document.getElementsByTagName('p')[1];
+      dropfax.ondragover = function() {
+        this.className = 'hover';
+        return false;
+      };
+      dropfax.ondragleave = function() {
+        this.className = '';
+        return false;
+      };
+      dropfax.ondrop = function(e) {
+        e = e || window.event;
+        e.preventDefault();
+        var
+          files = e.dataTransfer.files,
+          formData = new FormData(),
+          xhr = new XMLHttpRequest();
+        this.className = '';
+        formData.append('to', input.value);
+        for(var i = 0; i < files.length; i++)
+          formData.append('file', files[i]);
+        xhr.open('POST', '/');
+        xhr.onreadystatechange = function() {
+          if(xhr.readyState == 4 && xhr.status == 200)
+            status.innerText = xhr.responseText;
+        };
+        xhr.send(formData);
+        return false;
+      };
+    </script>
+  </body>
+</html>
